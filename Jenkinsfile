@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        choice(name: 'PRODUCT', choices: ['productA', 'productB'], description: 'Select the product to execute')
+        choice(name: 'PRODUCT', choices: ['saucedemo'], description: 'Select the product to execute')
         choice(name: 'TEST_ENV', choices: ['qa', 'uat', 'dev'], description: 'Target environment')
         choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit'], description: 'Browser to run tests on')
         booleanParam(name: 'HEADLESS', defaultValue: true, description: 'Run in headless mode')
@@ -32,8 +32,25 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 // Install node modules and Playwright system dependencies
-                sh 'npm ci'
+                sh 'npm ci --legacy-peer-deps'
                 sh 'npx playwright install --with-deps'
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                sh 'npm run lint'
+            }
+        }
+
+        stage('Generate Auth State') {
+            steps {
+                script {
+                    // Generate auth storage state to skip repetitive UI logins
+                    catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                        sh "npm run auth:${params.PRODUCT}"
+                    }
+                }
             }
         }
 
@@ -61,8 +78,8 @@ pipeline {
 
     post {
         always {
-            // Archive the generated Cucumber HTML report
-            archiveArtifacts artifacts: 'reports/cucumber-report.html', allowEmptyArchive: true
+            // Archive the generated HTML report directory
+            archiveArtifacts artifacts: 'reports/html-report/**/*', allowEmptyArchive: true
             
             // Archive failure traces, screenshots, and optional videos
             archiveArtifacts artifacts: 'reports/artifacts/**/*', allowEmptyArchive: true
@@ -73,8 +90,8 @@ pipeline {
                 allowMissing: false, 
                 alwaysLinkToLastBuild: true, 
                 keepAll: true, 
-                reportDir: 'reports', 
-                reportFiles: 'cucumber-report.html', 
+                reportDir: 'reports/html-report', 
+                reportFiles: 'index.html', 
                 reportName: 'Cucumber Report'
             ])
             */
