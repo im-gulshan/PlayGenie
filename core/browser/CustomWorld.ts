@@ -18,8 +18,8 @@ declare module '@cucumber/cucumber' {
     context: BrowserContext;
     page: Page;
     request: APIRequestContext;
-    pages: Record<string, any>;
-    sharedData: Record<string, any>;
+    pages: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+    sharedData: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
     init(scenarioName: string): Promise<void>;
   }
 }
@@ -30,8 +30,8 @@ export class CustomWorld extends World {
   context!: BrowserContext;
   page!: Page;
   request!: APIRequestContext;
-  pages!: Record<string, any>;
-  sharedData: Record<string, any> = {};
+  pages!: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  sharedData: Record<string, any> = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   constructor(options: IWorldOptions) {
     super(options);

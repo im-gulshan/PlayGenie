@@ -96,7 +96,7 @@ AfterAll({ timeout: 10000 }, async function () {
   if (globalBrowser) {
     try {
       await globalBrowser.close();
-    } catch (e) {
+    } catch (_e) {
       // Browser may already be closed or unresponsive — safe to ignore
     }
   }

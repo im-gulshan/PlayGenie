@@ -26,6 +26,11 @@ pipeline {
 
         // Use the standard Playwright browser cache location (0 = use default)
         PLAYWRIGHT_BROWSERS_PATH = '0'
+
+        // SauceDemo credentials — stored as Jenkins Secret Text credentials
+        // Add these in: Manage Jenkins -> Credentials -> Global -> Add Credentials (Secret text)
+        SAUCE_USERNAME = credentials('sauce-username')
+        SAUCE_PASSWORD = credentials('sauce-password')
     }
 
     stages {
