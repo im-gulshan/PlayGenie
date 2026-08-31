@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    // Tell Jenkins to use the Node.js installation named "NodeJS-20"
+    // Configure this name in: Manage Jenkins -> Tools -> NodeJS installations
+    tools {
+        nodejs 'NodeJS-20'
+    }
+
     parameters {
         choice(name: 'PRODUCT', choices: ['saucedemo'], description: 'Select the product to execute')
         choice(name: 'TEST_ENV', choices: ['qa', 'uat', 'dev'], description: 'Target environment')
@@ -13,13 +19,13 @@ pipeline {
 
     environment {
         // Map Jenkins parameters directly to the environment variables our framework expects
-        TEST_ENV = "${params.TEST_ENV}"
-        BROWSER = "${params.BROWSER}"
-        HEADLESS = "${params.HEADLESS}"
+        TEST_ENV     = "${params.TEST_ENV}"
+        BROWSER      = "${params.BROWSER}"
+        HEADLESS     = "${params.HEADLESS}"
         RECORD_VIDEO = "${params.RECORD_VIDEO}"
-        
-        // Example of secure credentials mapping
-        // ADMIN_PASSWORD = credentials('productA-admin-password')
+
+        // Use the standard Playwright browser cache location (0 = use default)
+        PLAYWRIGHT_BROWSERS_PATH = '0'
     }
 
     stages {
@@ -31,15 +37,17 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                // Install node modules and Playwright system dependencies
-                sh 'npm ci --legacy-peer-deps'
-                sh 'npx playwright install --with-deps'
+                // Install node modules and Playwright browsers with system dependencies
+                bat 'npm ci --legacy-peer-deps'
+                bat 'npx playwright install --with-deps'
             }
         }
 
         stage('Lint') {
             steps {
-                sh 'npm run lint'
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    bat 'npm run lint'
+                }
             }
         }
 
@@ -48,7 +56,7 @@ pipeline {
                 script {
                     // Generate auth storage state to skip repetitive UI logins
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        sh "npm run auth:${params.PRODUCT}"
+                        bat "npm run auth:${params.PRODUCT}"
                     }
                 }
             }
@@ -57,13 +65,13 @@ pipeline {
         stage('Execute UI Tests') {
             steps {
                 script {
-                    def tagFlag = params.TAGS ? "-- --tags \"${params.TAGS}\"" : ""
+                    def tagFlag      = params.TAGS ? "-- --tags \"${params.TAGS}\"" : ""
                     def parallelFlag = "-- --parallel ${params.PARALLEL_WORKERS}"
-                    
+
                     // catchError ensures we continue to reporting/archiving even if tests fail
                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                         echo "Executing: npm run test:${params.PRODUCT} ${tagFlag} ${parallelFlag}"
-                        sh "npm run test:${params.PRODUCT} ${tagFlag} ${parallelFlag}"
+                        bat "npm run test:${params.PRODUCT} ${tagFlag} ${parallelFlag}"
                     }
                 }
             }
@@ -71,7 +79,7 @@ pipeline {
 
         stage('Generate HTML Report') {
             steps {
-                sh 'npm run report'
+                bat 'npm run report'
             }
         }
     }
@@ -80,24 +88,22 @@ pipeline {
         always {
             // Archive the generated HTML report directory
             archiveArtifacts artifacts: 'reports/html-report/**/*', allowEmptyArchive: true
-            
+
             // Archive failure traces, screenshots, and optional videos
             archiveArtifacts artifacts: 'reports/artifacts/**/*', allowEmptyArchive: true
-            
-            // If the Jenkins HTML Publisher plugin is installed:
-            /*
+
+            // Publish the Cucumber HTML report — requires HTML Publisher plugin
             publishHTML([
-                allowMissing: false, 
-                alwaysLinkToLastBuild: true, 
-                keepAll: true, 
-                reportDir: 'reports/html-report', 
-                reportFiles: 'index.html', 
-                reportName: 'Cucumber Report'
+                allowMissing:          false,
+                alwaysLinkToLastBuild: true,
+                keepAll:               true,
+                reportDir:             'reports/html-report',
+                reportFiles:           'index.html',
+                reportName:            'Cucumber Report'
             ])
-            */
         }
         failure {
-            echo "Tests encountered failures. Please review the attached Cucumber Report and Playwright Traces."
+            echo 'Tests encountered failures. Please review the attached Cucumber Report and Playwright Traces.'
         }
     }
 }
