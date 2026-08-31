@@ -1,6 +1,13 @@
-class LoginPage {
-  constructor(page) {
-    this.page = page;
+import { Page, Locator } from '@playwright/test';
+import { BasePage } from '@core/pages/BasePage';
+
+export class LoginPage extends BasePage {
+  readonly usernameInput: Locator;
+  readonly passwordInput: Locator;
+  readonly loginButton: Locator;
+
+  constructor(page: Page) {
+    super(page);
 
     // Locators strictly encapsulated within the Page Object
     this.usernameInput = page.locator('[data-test="username"]');
@@ -8,16 +15,14 @@ class LoginPage {
     this.loginButton = page.locator('[data-test="login-button"]');
   }
 
-  async navigate(url) {
+  async navigate(url: string): Promise<void> {
     await this.page.goto(url);
   }
 
-  async login(username, password) {
+  async login(username: string, password: string): Promise<void> {
     // Relying on Playwright's auto-waiting instead of arbitrary timeouts
     await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
     await this.loginButton.click();
   }
 }
-
-module.exports = { LoginPage };

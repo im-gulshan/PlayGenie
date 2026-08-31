@@ -18,8 +18,17 @@ npm run test:saucedemo
 
 ---
 
-## 1. Environment Selection
-Change the target environment by setting `TEST_ENV`. This determines which config file from `config/env/` is merged.
+## 1. Auth State Generation (Optional)
+Generate auth storage state to skip repetitive UI logins and reduce execution time:
+```bash
+npm run auth:saucedemo
+```
+This creates a `storageState.json` file in `.state/` that is automatically injected into the browser context for each scenario.
+
+---
+
+## 2. Environment Selection
+Change the target environment by setting `TEST_ENV`. This dynamically loads the correct config file from `config/env/`.
 
 **Linux / Mac:**
 ```bash
@@ -33,7 +42,7 @@ $env:TEST_ENV="uat"; npm run test:saucedemo
 
 ---
 
-## 2. Browser Selection
+## 3. Browser Selection
 Switch browsers without altering source code using `BROWSER` (`chromium` | `firefox` | `webkit`).
 
 ```bash
@@ -42,16 +51,17 @@ BROWSER=firefox npm run test:saucedemo
 
 ---
 
-## 3. Headed vs. Headless Mode
-The framework runs headless by default for CI safety. For local visual debugging, disable headless mode:
+## 4. Headed vs. Headless Mode
+The framework runs **headed by default** for local visual debugging. For CI safety (like in Jenkins), it must be run in headless mode:
 
 ```bash
-HEADLESS=false npm run test:saucedemo
+HEADLESS=true npm run test:saucedemo
 ```
+*(Note: The `Jenkinsfile` already explicitly sets `HEADLESS=true` for you, so it runs safely in CI without changes.)*
 
 ---
 
-## 4. Tag Execution
+## 5. Tag Execution
 Use Cucumber's `--tags` argument to filter which scenarios run. To avoid npm argument parsing bugs on Windows, it is safest to use `npx` directly for tag execution.
 
 ```bash
@@ -67,7 +77,7 @@ npx cucumber-js -p saucedemo --tags "not @regression"
 
 ---
 
-## 5. Parallel Execution
+## 6. Parallel Execution
 Because each scenario receives a fresh Playwright Context, you can safely execute tests in parallel to drastically reduce execution time.
 
 ```bash
@@ -77,7 +87,7 @@ npm run test:saucedemo -- --parallel 4
 
 ---
 
-## 6. Diagnostics (Traces & Video)
+## 7. Diagnostics (Traces & Video)
 By default, Playwright Traces are saved *only on failure*. You can override this behavior or enable video recording.
 
 ```bash
@@ -87,10 +97,39 @@ TRACE=on RECORD_VIDEO=true npm run test:saucedemo
 
 ---
 
-## 7. Reporting
-Following test execution, Cucumber outputs a JSON file to `reports/cucumber-report.json`. To generate the rich HTML report with attached screenshots and traces:
+## 8. Reporting
+Following test execution, Cucumber outputs a JSON file to `reports/`. To generate the rich HTML report:
 
 ```bash
 npm run report
 ```
-*(This will generate `reports/cucumber-report.html`)*
+*(This auto-discovers all `*-report.json` files and generates a report in `reports/html-report/`)*
+
+---
+
+## 9. Docker Execution
+For consistent, containerized execution:
+
+```bash
+# Build
+docker build -t playgenie .
+
+# Run all saucedemo tests
+docker run --rm playgenie
+
+# Run with custom tags
+docker run --rm playgenie npm run test:saucedemo -- --tags "@smoke"
+```
+
+---
+
+## 10. Logging
+Winston logs are written to:
+- **Console** — colorized, timestamped output
+- `logs/error.log` — errors only
+- `logs/combined.log` — all log levels
+
+Control log level via `LOG_LEVEL` environment variable:
+```bash
+LOG_LEVEL=debug npm run test:saucedemo
+```

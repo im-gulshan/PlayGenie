@@ -2,19 +2,37 @@
   "name": "playgenie",
   "version": "1.0.0",
   "description": "Multi-product UI Automation Framework using Playwright and Cucumber",
-  "main": "index.js",
   "scripts": {
     "test:saucedemo": "cucumber-js -p saucedemo",
+    "auth:saucedemo": "tsx products/saucedemo/auth/setup.ts",
     "lint": "eslint .",
-    "format": "prettier --write \"**/*.{js,json}\"",
-    "report": "node core/reporting/generate-report.js"
+    "format": "prettier --write \"**/*.{ts,js,json}\"",
+    "report": "tsx core/reporting/generate-report.ts",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.json": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
     "@cucumber/cucumber": "^10.0.0",
     "@playwright/test": "^1.40.0",
-    "cucumber-html-reporter": "*",
+    "@types/node": "^26.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.68.0",
+    "@typescript-eslint/parser": "^8.68.0",
     "dotenv": "^16.4.5",
     "eslint": "^8.56.0",
-    "prettier": "^3.2.5"
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "multiple-cucumber-html-reporter": "^3.7.0",
+    "prettier": "^3.2.5",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
+    "winston": "^3.17.0"
   }
 }
