@@ -52,11 +52,12 @@ BROWSER=firefox npm run test:saucedemo
 ---
 
 ## 4. Headed vs. Headless Mode
-The framework runs headless by default for CI safety. For local visual debugging, disable headless mode:
+The framework runs **headed by default** for local visual debugging. For CI safety (like in Jenkins), it must be run in headless mode:
 
 ```bash
-HEADLESS=false npm run test:saucedemo
+HEADLESS=true npm run test:saucedemo
 ```
+*(Note: The `Jenkinsfile` already explicitly sets `HEADLESS=true` for you, so it runs safely in CI without changes.)*
 
 ---
 

@@ -11,7 +11,7 @@ Feature: SauceDemo Place Order
     Scenario: Place a successful order
         When User adds the first product to the cart
         And User proceeds to checkout
-# And User fills in the checkout information
-# Then User should see the product name and price on the overview page
-# And User completes the order
-# Then User should see the order confirmation message
+        And User add details in the checkout information page and click on Continue
+        Then User should see the product name and price on the overview page
+        And User completes the order
+        Then User should see the order confirmation message

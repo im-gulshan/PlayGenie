@@ -19,6 +19,7 @@ declare module '@cucumber/cucumber' {
     page: Page;
     request: APIRequestContext;
     pages: Record<string, any>;
+    sharedData: Record<string, any>;
     init(scenarioName: string): Promise<void>;
   }
 }
@@ -30,10 +31,12 @@ export class CustomWorld extends World {
   page!: Page;
   request!: APIRequestContext;
   pages!: Record<string, any>;
+  sharedData: Record<string, any> = {};
 
   constructor(options: IWorldOptions) {
     super(options);
     this.logger = new Logger('Scenario');
+    this.sharedData = {};
   }
 
   async init(scenarioName: string): Promise<void> {

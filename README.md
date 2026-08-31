@@ -135,7 +135,7 @@ To change configurations on the fly, use Environment Variables:
 * **Product:** `npm run test:saucedemo`
 * **Environment:** `$env:TEST_ENV="uat"; npm run test:saucedemo` (PowerShell) or `TEST_ENV=uat npm run test:saucedemo` (Bash)
 * **Browser:** `$env:BROWSER="firefox"; npm run test:saucedemo`
-* **Headed Mode (Visual):** `$env:HEADLESS="false"; npm run test:saucedemo`
+* **Headless Mode:** `$env:HEADLESS="true"; npm run test:saucedemo` (By default, the framework runs in Headed mode locally).
 
 ### Test Filtering & Parallelism
 * **Tags:** `npx cucumber-js -p saucedemo --tags "@smoke"`
@@ -182,4 +182,5 @@ The pipeline includes:
 ## 🛡️ Code Quality
 - **ESLint + Prettier** enforce consistent code style
 - **Husky + lint-staged** run lint and format checks on every `git commit`
+  - *(Note: Until `@typescript-eslint` supports TypeScript 7.0, you may need to commit using `git commit --no-verify` to bypass the pre-commit hook).*
 - **TypeScript strict mode** catches type errors at compile time
