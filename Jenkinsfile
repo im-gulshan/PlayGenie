@@ -70,13 +70,16 @@ pipeline {
         stage('Execute UI Tests') {
             steps {
                 script {
-                    def tagFlag      = params.TAGS ? "-- --tags \"${params.TAGS}\"" : ""
-                    def parallelFlag = "-- --parallel ${params.PARALLEL_WORKERS}"
+                    // Bug #4 fix: call npx cucumber-js directly to bypass npm's argument
+                    // interception on Windows. Using `npm run -- --parallel` causes npm to
+                    // consume --parallel as its own config flag before passing args to cucumber.
+                    def tagArg      = params.TAGS ? "--tags \"${params.TAGS}\"" : ""
+                    def cucumberCmd = "npx cucumber-js -p ${params.PRODUCT} --parallel ${params.PARALLEL_WORKERS} ${tagArg}".trim()
 
                     // catchError ensures we continue to reporting/archiving even if tests fail
                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                        echo "Executing: npm run test:${params.PRODUCT} ${tagFlag} ${parallelFlag}"
-                        bat "npm run test:${params.PRODUCT} ${tagFlag} ${parallelFlag}"
+                        echo "Executing: ${cucumberCmd}"
+                        bat cucumberCmd
                     }
                 }
             }
@@ -91,21 +94,28 @@ pipeline {
 
     post {
         always {
-            // Archive the generated HTML report directory
-            archiveArtifacts artifacts: 'reports/html-report/**/*', allowEmptyArchive: true
+            // Bug #1 fix: archiveArtifacts and publishHTML require a node/workspace context.
+            // In a Declarative Pipeline the top-level post block runs outside the node context,
+            // so we explicitly re-acquire one here.
+            node {
+                // Archive the generated HTML report directory
+                archiveArtifacts artifacts: 'reports/html-report/**/*', allowEmptyArchive: true
 
-            // Archive failure traces, screenshots, and optional videos
-            archiveArtifacts artifacts: 'reports/artifacts/**/*', allowEmptyArchive: true
+                // Archive failure traces, screenshots, and optional videos
+                archiveArtifacts artifacts: 'reports/artifacts/**/*', allowEmptyArchive: true
 
-            // Publish the Cucumber HTML report — requires HTML Publisher plugin
-            publishHTML([
-                allowMissing:          false,
-                alwaysLinkToLastBuild: true,
-                keepAll:               true,
-                reportDir:             'reports/html-report',
-                reportFiles:           'index.html',
-                reportName:            'Cucumber Report'
-            ])
+                // Bug #3 fix: allowMissing: true so the post block never fails when the
+                // report stage was skipped (reports/ is in .gitignore and won't exist
+                // on a fresh checkout if the generate-report stage didn't run).
+                publishHTML([
+                    allowMissing:          true,
+                    alwaysLinkToLastBuild: true,
+                    keepAll:               true,
+                    reportDir:             'reports/html-report',
+                    reportFiles:           'index.html',
+                    reportName:            'Cucumber Report'
+                ])
+            }
         }
         failure {
             echo 'Tests encountered failures. Please review the attached Cucumber Report and Playwright Traces.'
