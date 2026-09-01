@@ -87,26 +87,24 @@ pipeline {
 
         stage('Generate HTML Report') {
             steps {
-                bat 'npm run report'
+                // catchError so a missing JSON report does not block Publish Reports
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    bat 'npm run report'
+                }
             }
         }
-    }
 
-    post {
-        always {
-            // Bug #1 fix: archiveArtifacts and publishHTML require a node/workspace context.
-            // In a Declarative Pipeline the top-level post block runs outside the node context,
-            // so we explicitly re-acquire one here.
-            node {
-                // Archive the generated HTML report directory
+        stage('Publish Reports') {
+            steps {
+                // archiveArtifacts and publishHTML are workspace steps — they must live
+                // inside a stage, not in post{}. Declarative Pipeline post{} runs outside
+                // the workspace context and does not support file-system steps.
                 archiveArtifacts artifacts: 'reports/html-report/**/*', allowEmptyArchive: true
+                archiveArtifacts artifacts: 'reports/artifacts/**/*',   allowEmptyArchive: true
 
-                // Archive failure traces, screenshots, and optional videos
-                archiveArtifacts artifacts: 'reports/artifacts/**/*', allowEmptyArchive: true
-
-                // Bug #3 fix: allowMissing: true so the post block never fails when the
-                // report stage was skipped (reports/ is in .gitignore and won't exist
-                // on a fresh checkout if the generate-report stage didn't run).
+                // Requires HTML Publisher plugin.
+                // allowMissing: true guards against reports/ being absent on a fresh checkout
+                // (reports/ is in .gitignore and is only created at runtime).
                 publishHTML([
                     allowMissing:          true,
                     alwaysLinkToLastBuild: true,
@@ -117,6 +115,12 @@ pipeline {
                 ])
             }
         }
+    }
+
+    post {
+        // post{} is for notifications only — not file-system operations.
+        // File-system steps (archiveArtifacts, publishHTML) have been moved
+        // to the Publish Reports stage above where workspace context is guaranteed.
         failure {
             echo 'Tests encountered failures. Please review the attached Cucumber Report and Playwright Traces.'
         }
