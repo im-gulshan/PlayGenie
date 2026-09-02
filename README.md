@@ -112,6 +112,10 @@ Create a `.steps.ts` file in your product's `steps/` directory.
 ### 4. Test Data
 Store test data fixtures in your product's `data/` directory using typed TypeScript objects. Reference them in step definitions instead of hardcoding strings.
 
+### 5. Data-Driven Testing
+When testing multiple input combinations (e.g., testing various user roles or validation messages), use Cucumber's `Scenario Outline` with an `Examples` table in your `.feature` file.
+**Rule:** Keep the `.feature` file clean. Do not store sensitive data (like passwords) in the `Examples` table. Instead, pass non-sensitive keys (like `username` or `userRole`) through the step parameters, and resolve sensitive data via `.env` or centralized `data/` fixtures in the step definitions.
+
 ---
 
 ## 🔐 Authentication, Sessions, and Personas

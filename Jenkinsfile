@@ -31,7 +31,6 @@ pipeline {
 
         // SauceDemo credentials — stored as Jenkins Secret Text credentials
         // Add these in: Manage Jenkins -> Credentials -> Global -> Add Credentials (Secret text)
-        SAUCE_USERNAME = credentials('sauce-username')
         SAUCE_PASSWORD = credentials('sauce-password')
     }
 

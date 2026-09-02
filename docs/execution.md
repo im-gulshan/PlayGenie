@@ -4,7 +4,7 @@ This framework relies on environment variables and Cucumber CLI arguments to dyn
 
 ## 0. Local Credentials (.env)
 Before running tests locally, ensure you have created a `.env` file at the root of the repository. You can copy the structure from `.env.example`.
-This file is used to securely inject sensitive data (like `SAUCE_USERNAME` and `SAUCE_PASSWORD`) without exposing them in the Git repository. Do not commit your `.env` file!
+This file is used to securely inject sensitive data without exposing them in the Git repository. For example, it can hold single-user credentials (like `SAUCE_USERNAME` for auth generation) or shared secrets (like `SAUCE_PASSWORD`) used dynamically across data-driven tests. Do not commit your `.env` file!
 
 
 ## Base Execution (Product Selection)

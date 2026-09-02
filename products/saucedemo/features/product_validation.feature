@@ -5,7 +5,7 @@ Feature: SauceDemo Place Order
 
     Background: Login into the application
         Given I navigate to the SauceDemo login page
-        When I log in with valid credentials
+        When I log in as "standard_user"
         Then the SauceDemo dashboard should be visible
 
     Scenario: Place a successful order
