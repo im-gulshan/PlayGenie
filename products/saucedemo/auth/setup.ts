@@ -46,11 +46,11 @@ export async function setupAuthState(
 const isDirectExecution = require.main === module;
 if (isDirectExecution) {
   const env = process.env.TEST_ENV || 'qa';
-  const username = process.env.SAUCE_USERNAME;
+  const username = process.env.SAUCE_USERNAME || 'standard_user';
   const password = process.env.SAUCE_PASSWORD;
 
-  if (!username || !password) {
-    console.error('Missing SAUCE_USERNAME or SAUCE_PASSWORD. Check your .env file.');
+  if (!password) {
+    console.error('Missing SAUCE_PASSWORD. Check your .env file.');
     process.exit(1);
   }
 
