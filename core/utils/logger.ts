@@ -8,6 +8,7 @@ import * as path from 'path';
  * - Levels: error, warn, info, http, debug
  * - Timestamps in YYYY-MM-DD HH:mm:ss format
  * - Colorized console output for local development
+ * - Plain text console output in CI/Jenkins (no ANSI escape codes)
  * - File output: logs/error.log (errors only) + logs/combined.log (all)
  * - Context label (e.g., scenario name) for traceability
  * - Environment-aware: debug in dev, info in CI
@@ -41,6 +42,23 @@ function getLogLevel(): string {
 }
 
 /**
+ * Returns true when running in a CI/Jenkins environment.
+ * Detection signals (any one is sufficient):
+ *   - stdout is not a real TTY (piped/captured by Jenkins)
+ *   - process.env.CI is set (GitHub Actions, CircleCI, etc.)
+ *   - process.env.JENKINS_URL is set (Jenkins-specific)
+ *   - process.env.BUILD_ID is set (set automatically by every Jenkins build)
+ */
+function isCI(): boolean {
+  return (
+    !process.stdout.isTTY ||
+    !!process.env.CI ||
+    !!process.env.JENKINS_URL ||
+    !!process.env.BUILD_ID
+  );
+}
+
+/**
  * Logger class wrapping Winston.
  * Instantiate with a context string (e.g., scenario name) for traceability.
  */
@@ -62,15 +80,26 @@ export class Logger {
         }),
       ),
       transports: [
-        // Console — colorized for readability
+        // Console — plain text in CI/Jenkins, colorized in local terminal
         new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.colorize({ all: true }),
-            winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-            winston.format.printf(({ timestamp, level, message }) => {
-              return `${timestamp} ${level} [${this.context}] ${message}`;
-            }),
-          ),
+          format: isCI()
+            ? // Plain format: no ANSI escape codes — renders cleanly in Jenkins console
+              winston.format.combine(
+                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+                winston.format.printf(({ timestamp, level, message, stack }) => {
+                  const paddedLevel = `[${level.toUpperCase()}]`.padEnd(7);
+                  const base = `${timestamp} ${paddedLevel} [${this.context}] ${message}`;
+                  return stack ? `${base}\n${stack}` : base;
+                }),
+              )
+            : // Colorized format for local terminal (PowerShell, VS Code, etc.)
+              winston.format.combine(
+                winston.format.colorize({ all: true }),
+                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+                winston.format.printf(({ timestamp, level, message }) => {
+                  return `${timestamp} ${level} [${this.context}] ${message}`;
+                }),
+              ),
         }),
         // File — errors only
         new winston.transports.File({
