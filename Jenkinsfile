@@ -24,8 +24,10 @@ pipeline {
         HEADLESS     = "${params.HEADLESS}"
         RECORD_VIDEO = "${params.RECORD_VIDEO}"
 
-        // Use the standard Playwright browser cache location (0 = use default)
-        PLAYWRIGHT_BROWSERS_PATH = '0'
+        // Persistent browser cache outside the workspace.
+        // Browsers survive npm ci (which wipes node_modules/) and are reused across builds.
+        // playwright install skips the download if the browser version already exists here.
+        PLAYWRIGHT_BROWSERS_PATH = 'C:\\ProgramData\\playwright-browsers'
 
         // SauceDemo credentials — stored as Jenkins Secret Text credentials
         // Add these in: Manage Jenkins -> Credentials -> Global -> Add Credentials (Secret text)
@@ -44,7 +46,8 @@ pipeline {
             steps {
                 // Install node modules and Playwright browsers with system dependencies
                 bat 'npm ci --legacy-peer-deps'
-                bat 'npx playwright install --with-deps'
+                // Install only the browser selected for this build — skips download if already cached.
+                bat "npx playwright install --with-deps ${params.BROWSER}"
             }
         }
 
