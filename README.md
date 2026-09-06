@@ -25,7 +25,7 @@ Products **must never** share Page Objects, Components, or Locators. If Product 
 │   └── saucedemo/
 │       ├── auth/            # Persona login state generation scripts
 │       ├── config/          # Product-specific URLs and overrides
-│       ├── data/            # Test data fixtures
+│       ├── data/            # Env-aware test data (common, qa, uat, index.ts)
 │       ├── features/        # BDD feature files
 │       ├── pages/           # Page Objects (extend BasePage)
 │       ├── steps/           # Step definitions
@@ -60,37 +60,15 @@ Clean imports using TypeScript path aliases:
 ---
 
 ## 🚀 How to Add a New Product (e.g., Product C)
-Adding a new product does **not** require modifying `core`, or any other product.
+Adding a new product does **not** require modifying `core`, or any other product. We provide a CLI script to instantly scaffold a new product's folder structure, generate template files, and inject the new profile into `cucumber.js` and `package.json`.
 
-1. **Create the Directory Structure:**
-   Create `products/product-c/` and replicate the standard subfolders (`config`, `data`, `features`, `steps`, `pages`, `support`, `auth`).
-2. **Create Page Objects:**
-   Each page object should extend `BasePage`:
-   ```typescript
-   import { BasePage } from '@core/pages/BasePage';
-   export class MyPage extends BasePage { ... }
-   ```
-3. **Create a PageManager:**
-   Register all page objects in a `PageManager` class.
-4. **Create Support Hooks:**
-   Add a `support/hooks.ts` with `Before({ order: 1 })` to initialize your PageManager.
-5. **Register the Profile:**
-   Open `cucumber.js` at the root and add a new profile block:
-   ```javascript
-   productC: {
-     requireModule: ['tsx/cjs'],
-     paths: ["products/product-c/features/**/*.feature"],
-     require: [
-       "core/browser/**/*.ts",
-       "core/utils/**/*.ts",
-       "products/product-c/steps/**/*.ts",
-       "products/product-c/support/**/*.ts"
-     ],
-     format: ["progress", "json:reports/product-c-report.json"]
-   }
-   ```
-6. **Add the NPM Script:**
-   Open `package.json` and add `"test:productC": "cucumber-js -p productC"`.
+```bash
+npm run generate:product -- --name productC
+```
+
+1. **Scaffold:** Run the command above.
+2. **Author:** Add your pages to `products/product-c/pages/` and step definitions to `products/product-c/steps/`.
+3. **Execute:** Run `npm run test:productC`.
 
 ---
 
@@ -110,7 +88,7 @@ Create a `.steps.ts` file in your product's `steps/` directory.
 **Rule:** Access Page Objects via `this.pages.<pageName>` (from Cucumber World). Perform your assertions here using Playwright's web-first assertions (e.g., `expect(locator).toBeVisible()`).
 
 ### 4. Test Data
-Store test data fixtures in your product's `data/` directory using typed TypeScript objects. Reference them in step definitions instead of hardcoding strings.
+Store test data fixtures in your product's `data/` directory using typed TypeScript objects. Use the environment resolver pattern (`qa.data.ts`, `uat.data.ts`, `common.data.ts`, and `index.ts`) so data dynamically adapts based on `TEST_ENV`. Reference them in step definitions instead of hardcoding strings.
 
 ### 5. Data-Driven Testing
 When testing multiple input combinations (e.g., testing various user roles or validation messages), use Cucumber's `Scenario Outline` with an `Examples` table in your `.feature` file.
@@ -184,7 +162,6 @@ The pipeline includes:
 ---
 
 ## 🛡️ Code Quality
-- **ESLint + Prettier** enforce consistent code style
-- **Husky + lint-staged** run lint and format checks on every `git commit`
-  - *(Note: Until `@typescript-eslint` supports TypeScript 7.0, you may need to commit using `git commit --no-verify` to bypass the pre-commit hook).*
-- **TypeScript strict mode** catches type errors at compile time
+- **ESLint 9 + Prettier** enforce consistent code style.
+- **Husky + lint-staged** run lint and format checks on every `git commit`.
+- **TypeScript strict mode** catches type errors at compile time (using TS 6 side-by-side with 7 to maintain linter compatibility).

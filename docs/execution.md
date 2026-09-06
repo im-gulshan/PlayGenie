@@ -23,7 +23,7 @@ Generate auth storage state to skip repetitive UI logins and reduce execution ti
 ```bash
 npm run auth:saucedemo
 ```
-This creates a `storageState.json` file in `.state/` that is automatically injected into the browser context for each scenario.
+This creates a `{Product}_{Env}_{Persona}.json` file in `.state/` that is automatically injected into the browser context for each scenario.
 
 ---
 
