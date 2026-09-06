@@ -13,6 +13,6 @@ export class CartPage extends BasePage {
 
   // Methods
   async clickOnCheckout(): Promise<void> {
-    await this.checkout.click();
+    await this.safeClick(this.checkout);
   }
 }

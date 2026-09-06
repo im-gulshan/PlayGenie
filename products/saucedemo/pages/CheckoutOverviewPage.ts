@@ -20,9 +20,8 @@ export class CheckoutOverviewPage extends BasePage {
     this.productCard = new ProductCard(page.locator('.cart_item'));
   }
 
-  // Page related methods
   async clickFinish(): Promise<void> {
-    await this.finishButton.click();
+    await this.safeClick(this.finishButton);
   }
 
   async getItemTotal(): Promise<string> {
