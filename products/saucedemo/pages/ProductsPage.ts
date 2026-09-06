@@ -1,11 +1,12 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '@core/pages/BasePage';
+import { ProductCard } from '../components/ProductCard';
 
 export class ProductsPage extends BasePage {
   readonly dashboardHeading: Locator;
   readonly addToCart: Locator;
   readonly clickOnCart: Locator;
-  readonly productName: Locator;
+  readonly productCard: ProductCard;
 
   constructor(page: Page) {
     super(page);
@@ -14,7 +15,9 @@ export class ProductsPage extends BasePage {
     this.dashboardHeading = page.getByText('Swag Labs');
     this.addToCart = page.getByRole('button', { name: 'Add to cart' });
     this.clickOnCart = page.locator('[data-test="shopping-cart-link"]');
-    this.productName = page.locator('.inventory_item_name');
+
+    // Compose the reusable ProductCard component
+    this.productCard = new ProductCard(page.locator('.inventory_item'));
   }
 
   async selectFirstProduct(): Promise<void> {
@@ -25,8 +28,7 @@ export class ProductsPage extends BasePage {
     await this.clickOnCart.click();
   }
 
-  async getFirstProductName(): Promise<string | null> {
-    const prod = await this.productName.nth(0).textContent();
-    return prod;
+  async getFirstProductName(): Promise<string> {
+    return this.productCard.getFirstName();
   }
 }

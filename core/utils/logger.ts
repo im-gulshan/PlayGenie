@@ -2,7 +2,12 @@ import winston from 'winston';
 import * as path from 'path';
 
 /**
- * Industry-standard logger built on Winston.
+ * Industry-standard logger built on Winston — singleton + child logger pattern.
+ *
+ * Architecture:
+ * - A single root Winston instance is created once (module-level singleton)
+ * - new Logger(context) returns a lightweight wrapper sharing the root's transports
+ * - Safe for parallel Cucumber workers — no duplicate file handles
  *
  * Features:
  * - Levels: error, warn, info, http, debug
@@ -51,94 +56,115 @@ function getLogLevel(): string {
  */
 function isCI(): boolean {
   return (
-    !process.stdout.isTTY ||
-    !!process.env.CI ||
-    !!process.env.JENKINS_URL ||
-    !!process.env.BUILD_ID
+    !process.stdout.isTTY || !!process.env.CI || !!process.env.JENKINS_URL || !!process.env.BUILD_ID
   );
 }
 
 /**
- * Logger class wrapping Winston.
- * Instantiate with a context string (e.g., scenario name) for traceability.
+ * Create the format function for context-aware logging.
+ * Uses the `context` metadata field injected by child loggers.
+ */
+function createContextFormat() {
+  return winston.format.printf(({ timestamp, level, message, stack, context }) => {
+    const ctx = (context as string) || 'Global';
+    const base = `${timestamp} [${level.toUpperCase()}] [${ctx}] ${message}`;
+    return stack ? `${base}\n${stack}` : base;
+  });
+}
+
+/**
+ * Singleton root Winston logger — created once, shared by all Logger instances.
+ * File transports are attached here, so there's only one set of file handles
+ * regardless of how many scenarios run in parallel.
+ */
+const rootLogger = winston.createLogger({
+  level: getLogLevel(),
+  levels: customLevels.levels,
+  format: winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.errors({ stack: true }),
+    createContextFormat(),
+  ),
+  transports: [
+    // Console — plain text in CI/Jenkins, colorized in local terminal
+    new winston.transports.Console({
+      format: isCI()
+        ? // Plain format: no ANSI escape codes — renders cleanly in Jenkins console
+          winston.format.combine(
+            winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+            winston.format.printf(({ timestamp, level, message, stack, context }) => {
+              const ctx = (context as string) || 'Global';
+              const paddedLevel = `[${level.toUpperCase()}]`.padEnd(7);
+              const base = `${timestamp} ${paddedLevel} [${ctx}] ${message}`;
+              return stack ? `${base}\n${stack}` : base;
+            }),
+          )
+        : // Colorized format for local terminal (PowerShell, VS Code, etc.)
+          winston.format.combine(
+            winston.format.colorize({ all: true }),
+            winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+            winston.format.printf(({ timestamp, level, message, context }) => {
+              const ctx = (context as string) || 'Global';
+              return `${timestamp} ${level} [${ctx}] ${message}`;
+            }),
+          ),
+    }),
+    // File — errors only
+    new winston.transports.File({
+      filename: path.join(logsDir, 'error.log'),
+      level: 'error',
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+    }),
+    // File — all levels
+    new winston.transports.File({
+      filename: path.join(logsDir, 'combined.log'),
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+    }),
+  ],
+});
+
+/**
+ * Logger class — lightweight wrapper around the singleton root logger.
+ *
+ * Each instance tags log entries with a context string (e.g., scenario name)
+ * but shares the root logger's transports and file handles.
+ *
+ * @example
+ * ```typescript
+ * const logger = new Logger('Login Test');
+ * logger.info('Navigating to login page');
+ * ```
  */
 export class Logger {
-  private winstonLogger: winston.Logger;
-  private context: string;
+  private childLogger: winston.Logger;
 
-  constructor(context: string = 'Global') {
-    this.context = context;
-    this.winstonLogger = winston.createLogger({
-      level: getLogLevel(),
-      levels: customLevels.levels,
-      format: winston.format.combine(
-        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        winston.format.errors({ stack: true }),
-        winston.format.printf(({ timestamp, level, message, stack }) => {
-          const base = `${timestamp} [${level.toUpperCase()}] [${this.context}] ${message}`;
-          return stack ? `${base}\n${stack}` : base;
-        }),
-      ),
-      transports: [
-        // Console — plain text in CI/Jenkins, colorized in local terminal
-        new winston.transports.Console({
-          format: isCI()
-            ? // Plain format: no ANSI escape codes — renders cleanly in Jenkins console
-              winston.format.combine(
-                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-                winston.format.printf(({ timestamp, level, message, stack }) => {
-                  const paddedLevel = `[${level.toUpperCase()}]`.padEnd(7);
-                  const base = `${timestamp} ${paddedLevel} [${this.context}] ${message}`;
-                  return stack ? `${base}\n${stack}` : base;
-                }),
-              )
-            : // Colorized format for local terminal (PowerShell, VS Code, etc.)
-              winston.format.combine(
-                winston.format.colorize({ all: true }),
-                winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-                winston.format.printf(({ timestamp, level, message }) => {
-                  return `${timestamp} ${level} [${this.context}] ${message}`;
-                }),
-              ),
-        }),
-        // File — errors only
-        new winston.transports.File({
-          filename: path.join(logsDir, 'error.log'),
-          level: 'error',
-          maxsize: 5242880, // 5MB
-          maxFiles: 5,
-        }),
-        // File — all levels
-        new winston.transports.File({
-          filename: path.join(logsDir, 'combined.log'),
-          maxsize: 5242880, // 5MB
-          maxFiles: 5,
-        }),
-      ],
-    });
+  constructor(private context: string = 'Global') {
+    this.childLogger = rootLogger.child({ context: this.context });
   }
 
   info(msg: string): void {
-    this.winstonLogger.info(msg);
+    this.childLogger.info(msg);
   }
 
   error(msg: string, err?: Error): void {
     if (err) {
-      this.winstonLogger.error(`${msg} — ${err.message}`, { stack: err.stack });
+      this.childLogger.error(`${msg} — ${err.message}`, { stack: err.stack });
     } else {
-      this.winstonLogger.error(msg);
+      this.childLogger.error(msg);
     }
   }
 
   warn(msg: string): void {
-    this.winstonLogger.warn(msg);
+    this.childLogger.warn(msg);
   }
 
   debug(msg: string): void {
-    this.winstonLogger.debug(msg);
+    this.childLogger.debug(msg);
   }
 
   http(msg: string): void {
-    this.winstonLogger.http(msg);
+    this.childLogger.http(msg);
   }
 }

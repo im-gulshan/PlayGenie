@@ -35,15 +35,41 @@ BeforeAll(async function () {
 Before(async function (scenario: ITestCaseHookParameter) {
   await this.init(scenario.pickle.name);
 
-  // Check for auth storage state to skip repetitive UI logins
+  // Check for auth storage state to skip repetitive UI logins.
+  // Looks for a product/persona-specific file, not just the first .json in .state/
   const stateDir = config.stateDir;
   let storageStatePath: string | undefined;
 
   if (fs.existsSync(stateDir)) {
-    // Look for any storage state file matching this product/env
-    const files = fs.readdirSync(stateDir).filter((f) => f.endsWith('.json'));
-    if (files.length > 0) {
-      storageStatePath = `${stateDir}/${files[0]}`;
+    // Product hooks can set product name and persona via sharedData
+    const product = (this.sharedData.productName as string) || '';
+    const env = process.env.TEST_ENV || 'qa';
+    const persona = (this.sharedData.persona as string) || 'default';
+
+    // Look for an exact match first: {product}_{env}_{persona}.json
+    const exactFile = `${product}_${env}_${persona}.json`;
+    const exactPath = `${stateDir}/${exactFile}`;
+
+    if (fs.existsSync(exactPath)) {
+      // TTL check — warn if storage state is older than 1 hour
+      const stats = fs.statSync(exactPath);
+      const ageMs = Date.now() - stats.mtimeMs;
+      const ONE_HOUR = 60 * 60 * 1000;
+      if (ageMs > ONE_HOUR) {
+        this.logger.warn(
+          `Storage state ${exactFile} is ${Math.round(ageMs / 60000)} minutes old. Consider regenerating with npm run auth:*`,
+        );
+      }
+      storageStatePath = exactPath;
+    } else {
+      // Fallback: use any available .json file (backward compatibility)
+      const files = fs.readdirSync(stateDir).filter((f) => f.endsWith('.json'));
+      if (files.length > 0) {
+        storageStatePath = `${stateDir}/${files[0]}`;
+        this.logger.debug(
+          `No exact storage state match for ${exactFile}, falling back to ${files[0]}`,
+        );
+      }
     }
   }
 
@@ -92,12 +118,19 @@ After(async function (scenario: ITestCaseHookParameter) {
   await this.request.dispose();
 });
 
-AfterAll({ timeout: 10000 }, async function () {
+AfterAll({ timeout: 15000 }, async function () {
   if (globalBrowser) {
     try {
-      await globalBrowser.close();
-    } catch (_e) {
-      // Browser may already be closed or unresponsive — safe to ignore
+      // Use Promise.race to prevent Playwright's browser.close() from hanging indefinitely.
+      // This often happens in parallel mode when idle workers spin up and immediately shut down.
+      await Promise.race([
+        globalBrowser.close(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Browser close timed out')), 5000),
+        ),
+      ]);
+    } catch {
+      // Browser may already be closed, unresponsive, or timed out — safe to ignore
     }
   }
 });

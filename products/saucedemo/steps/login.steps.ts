@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 import config from '../config/saucedemo.config';
 import { Given, When, Then } from '../support/steps';
-import { sauceDemoData } from '../data/saucedemo.data';
+import { sauceDemoData } from '../data';
 
 Given('I navigate to the SauceDemo login page', async function () {
   this.logger.info(`Navigating to SauceDemo login page: ${config.baseUrl}`);
@@ -13,7 +13,9 @@ When('I log in as {string}', async function (username: string) {
 
   if (!password) {
     this.logger.error('Missing SAUCE_PASSWORD in environment variables.');
-    throw new Error('Missing SAUCE_PASSWORD in environment variables. Please check your .env file.');
+    throw new Error(
+      'Missing SAUCE_PASSWORD in environment variables. Please check your .env file.',
+    );
   }
 
   this.logger.info(`Attempting login with username: ${username}`);

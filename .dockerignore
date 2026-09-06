@@ -1,0 +1,13 @@
+node_modules/
+.git/
+logs/
+reports/
+.state/
+.env
+dist/
+.husky/
+.vscode/
+.playwright-mcp/
+scratch/
+docs/
+*.md
