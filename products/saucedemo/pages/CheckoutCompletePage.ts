@@ -25,6 +25,6 @@ export class CheckoutCompletePage extends BasePage {
   }
 
   async clickBackHome(): Promise<void> {
-    await this.backHomeButton.click();
+    await this.safeClick(this.backHomeButton);
   }
 }

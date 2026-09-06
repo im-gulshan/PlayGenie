@@ -17,14 +17,13 @@ export class CheckoutInfoPage extends BasePage {
     this.continueButton = page.locator('[data-test="continue"]');
   }
 
-  // Page related methods
   async addCheckoutInfo(fName: string, lName: string, zCode: string): Promise<void> {
-    await this.firstName.fill(fName);
-    await this.lastName.fill(lName);
-    await this.zipCode.fill(zCode);
+    await this.fillAndVerify(this.firstName, fName);
+    await this.fillAndVerify(this.lastName, lName);
+    await this.fillAndVerify(this.zipCode, zCode);
   }
 
   async clickContinue(): Promise<void> {
-    await this.continueButton.click();
+    await this.safeClick(this.continueButton);
   }
 }

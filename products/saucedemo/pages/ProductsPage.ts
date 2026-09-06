@@ -21,11 +21,11 @@ export class ProductsPage extends BasePage {
   }
 
   async selectFirstProduct(): Promise<void> {
-    await this.addToCart.nth(0).click();
+    await this.safeClick(this.addToCart.nth(0));
   }
 
   async openCart(): Promise<void> {
-    await this.clickOnCart.click();
+    await this.safeClick(this.clickOnCart);
   }
 
   async getFirstProductName(): Promise<string> {

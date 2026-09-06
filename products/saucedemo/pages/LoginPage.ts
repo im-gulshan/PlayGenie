@@ -18,13 +18,12 @@ export class LoginPage extends BasePage {
   }
 
   async navigate(url: string): Promise<void> {
-    await this.page.goto(url);
+    await this.navigateTo(url);
   }
 
   async login(username: string, password: string): Promise<void> {
-    // Relying on Playwright's auto-waiting instead of arbitrary timeouts
-    await this.usernameInput.fill(username);
-    await this.passwordInput.fill(password);
-    await this.loginButton.click();
+    await this.fillAndVerify(this.usernameInput, username);
+    await this.fillAndVerify(this.passwordInput, password);
+    await this.safeClick(this.loginButton);
   }
 }
