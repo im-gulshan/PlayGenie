@@ -10,5 +10,6 @@ import { PageManager } from '../pages/PageManager';
  * so the core Before hook (which sets this.page) always runs first.
  */
 Before(async function () {
+  this.sharedData.productName = 'SauceDemo';
   this.pages = new PageManager(this.page);
 });

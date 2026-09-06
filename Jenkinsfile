@@ -105,24 +105,51 @@ pipeline {
                 archiveArtifacts artifacts: 'reports/artifacts/**/*',   allowEmptyArchive: true
 
                 // Requires HTML Publisher plugin.
-                // allowMissing: true guards against reports/ being absent on a fresh checkout
-                // (reports/ is in .gitignore and is only created at runtime).
                 publishHTML([
                     allowMissing:          true,
                     alwaysLinkToLastBuild: true,
                     keepAll:               true,
                     reportDir:             'reports/html-report',
                     reportFiles:           'index.html',
-                    reportName:            'Cucumber Report'
+                    reportName:            'Cucumber HTML Report'
                 ])
+
+                // Requires Cucumber Reports plugin. Provides historical trend graphs.
+                cucumber buildStatus: 'UNSTABLE',
+                         customCssFiles: '',
+                         customJsFiles: '',
+                         failedFeaturesNumber: 0,
+                         failedScenariosNumber: 0,
+                         failedStepsNumber: 0,
+                         fileIncludePattern: 'reports/*.json',
+                         pendingStepsNumber: 0,
+                         skippedStepsNumber: 0,
+                         sortingMethod: 'ALPHABETICAL',
+                         undefinedStepsNumber: 0
             }
         }
     }
 
     post {
-        // post{} is for notifications only — not file-system operations.
-        // File-system steps (archiveArtifacts, publishHTML) have been moved
-        // to the Publish Reports stage above where workspace context is guaranteed.
+        always {
+            script {
+                def status = currentBuild.currentResult
+                def emoji = status == 'SUCCESS' ? '✅' : '❌'
+                def msg = "${emoji} PlayGenie Execution [${params.PRODUCT} - ${params.TEST_ENV}]: ${status}\\nReport: ${env.BUILD_URL}cucumber-html-reports/overview-features.html"
+                
+                // Example Slack Notification (Requires Slack Notification Plugin)
+                // slackSend(channel: '#qa-automation', message: msg, color: status == 'SUCCESS' ? 'good' : 'danger')
+
+                // Example Email Notification (Requires Email Extension Plugin)
+                // emailext(
+                //     subject: "Test Execution ${status}: Build #${env.BUILD_NUMBER}",
+                //     body: msg,
+                //     to: 'qa-team@example.com'
+                // )
+                
+                echo "Notification that would be sent: ${msg}"
+            }
+        }
         failure {
             echo 'Tests encountered failures. Please review the attached Cucumber Report and Playwright Traces.'
         }

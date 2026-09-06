@@ -2,30 +2,42 @@ import {
   Given as CucumberGiven,
   When as CucumberWhen,
   Then as CucumberThen,
-  IDefineStepOptions,
 } from '@cucumber/cucumber';
 import { SauceDemoWorld } from './types';
 
 /**
  * Custom wrappers for Cucumber step definitions.
- * This automatically types the `this` context to `SauceDemoWorld`
+ *
+ * Automatically types the `this` context to `SauceDemoWorld`
  * so you don't have to add `this: SauceDemoWorld` to every step.
+ *
+ * When creating a new product, copy this file and replace
+ * `SauceDemoWorld` with your product's World interface.
  */
 
-interface IDefineStepStrong {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (pattern: RegExp | string, code: (this: SauceDemoWorld, ...args: any[]) => any): void;
+/** Step definition options (timeout, tags, etc.) */
+interface StepOptions {
+  timeout?: number;
+  wrapperOptions?: Record<string, unknown>;
+}
+
+/** Strongly-typed step definition function signature */
+interface TypedStepFn {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (
-    pattern: RegExp | string,
-    options: IDefineStepOptions,
-    code: (this: SauceDemoWorld, ...args: any[]) => any,
+    pattern: string | RegExp,
+    code: (this: SauceDemoWorld, ...args: any[]) => void | Promise<void>,
+  ): void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (
+    pattern: string | RegExp,
+    options: StepOptions,
+    code: (this: SauceDemoWorld, ...args: any[]) => void | Promise<void>,
   ): void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Given: IDefineStepStrong = (...args: any[]) => (CucumberGiven as any)(...args); // eslint-disable-line @typescript-eslint/no-explicit-any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const When: IDefineStepStrong = (...args: any[]) => (CucumberWhen as any)(...args); // eslint-disable-line @typescript-eslint/no-explicit-any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Then: IDefineStepStrong = (...args: any[]) => (CucumberThen as any)(...args); // eslint-disable-line @typescript-eslint/no-explicit-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export const Given: TypedStepFn = (...args: any[]) => (CucumberGiven as any)(...args);
+export const When: TypedStepFn = (...args: any[]) => (CucumberWhen as any)(...args);
+export const Then: TypedStepFn = (...args: any[]) => (CucumberThen as any)(...args);
+/* eslint-enable @typescript-eslint/no-explicit-any */

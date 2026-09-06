@@ -8,8 +8,9 @@ import { Logger } from '@core/utils/logger';
  * This class is 100% product-agnostic. Products attach their own
  * PageManager via product-level Before hooks (e.g., products/saucedemo/support/hooks.ts).
  *
- * The `pages` property is typed as `Record<string, any>` so any product
- * can set its own strongly-typed PageManager without modifying core.
+ * The `pages` property is typed as `Record<string, unknown>` at the core level.
+ * Products override this with a strongly-typed PageManager via module augmentation
+ * in their `support/types.ts` file.
  */
 declare module '@cucumber/cucumber' {
   interface IWorld {
@@ -18,8 +19,8 @@ declare module '@cucumber/cucumber' {
     context: BrowserContext;
     page: Page;
     request: APIRequestContext;
-    pages: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-    sharedData: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+    pages: unknown;
+    sharedData: Record<string, unknown>;
     init(scenarioName: string): Promise<void>;
   }
 }
@@ -30,8 +31,8 @@ export class CustomWorld extends World {
   context!: BrowserContext;
   page!: Page;
   request!: APIRequestContext;
-  pages!: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-  sharedData: Record<string, any> = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
+  pages!: unknown;
+  sharedData: Record<string, unknown> = {};
 
   constructor(options: IWorldOptions) {
     super(options);

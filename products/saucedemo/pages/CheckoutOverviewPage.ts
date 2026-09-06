@@ -1,11 +1,12 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '@core/pages/BasePage';
+import { ProductCard } from '../components/ProductCard';
 
 export class CheckoutOverviewPage extends BasePage {
   readonly finishButton: Locator;
   readonly itemTotal: Locator;
   readonly summaryInfo: Locator;
-  readonly overviewPageProducts: Locator;
+  readonly productCard: ProductCard;
 
   constructor(page: Page) {
     super(page);
@@ -14,7 +15,9 @@ export class CheckoutOverviewPage extends BasePage {
     this.finishButton = page.getByRole('button', { name: 'finish' });
     this.itemTotal = page.locator('[data-test="subtotal-label"]');
     this.summaryInfo = page.locator('[data-test="payment-info-value"]');
-    this.overviewPageProducts = page.locator('.inventory_item_name');
+
+    // Compose the reusable ProductCard component
+    this.productCard = new ProductCard(page.locator('.cart_item'));
   }
 
   // Page related methods
@@ -27,6 +30,6 @@ export class CheckoutOverviewPage extends BasePage {
   }
 
   async getAllProductNames(): Promise<string[]> {
-    return (await this.overviewPageProducts.allTextContents());
+    return this.productCard.getAllNames();
   }
 }
