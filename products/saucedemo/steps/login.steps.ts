@@ -25,13 +25,16 @@ When('I log in as {string}', async function (username: string) {
 
 Then('the SauceDemo dashboard should be visible', async function () {
   this.logger.info('Validating that the Swag Labs dashboard heading is visible...');
-  await expect(this.pages.productsPage.dashboardHeading).toBeVisible({ timeout: 5000 });
+  await this.pages.productsPage.waitForDashboard();
+  const isVisible = await this.pages.productsPage.isDashboardVisible();
+  expect(isVisible).toBe(true);
   this.logger.info('Dashboard is successfully visible.');
 });
 
 Then('I should see a locked out error message', async function () {
   this.logger.info('Validating locked out error message...');
-  await expect(this.pages.loginPage.errorMessage).toBeVisible({ timeout: 5000 });
-  await expect(this.pages.loginPage.errorMessage).toHaveText(sauceDemoData.messages.lockedOutError);
+  await this.pages.loginPage.waitForErrorMessage();
+  const errorMessage = await this.pages.loginPage.getErrorMessage();
+  expect(errorMessage).toBe(sauceDemoData.messages.lockedOutError);
   this.logger.info('Locked out error message validated successfully.');
 });

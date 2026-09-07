@@ -23,15 +23,15 @@ interface StepOptions {
 
 /** Strongly-typed step definition function signature */
 interface TypedStepFn {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (
     pattern: string | RegExp,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     code: (this: SauceDemoWorld, ...args: any[]) => void | Promise<void>,
   ): void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (
     pattern: string | RegExp,
     options: StepOptions,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     code: (this: SauceDemoWorld, ...args: any[]) => void | Promise<void>,
   ): void;
 }

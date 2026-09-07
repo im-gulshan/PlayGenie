@@ -39,11 +39,12 @@ Products **must never** share Page Objects, Components, or Locators. If Product 
 
 ## 🏗️ Architecture Highlights
 
-### BasePage Pattern
+### BasePage Pattern (Pure POM)
 All page objects extend `BasePage` (from `core/pages/BasePage.ts`), which provides:
 - Consistent constructor signature (`page: Page`)
-- Shared utility methods: `waitForPageLoad()`, `getPageUrl()`, `getPageTitle()`
-- A contract that ensures consistency across all products
+- Shared utility methods: `waitForPageLoad()`, `navigateTo()`, `safeClick()`, `fillAndVerify()`
+- Null-safe text extraction: `getText()`, `getTexts()`
+- A contract that ensures consistency across all products. We use a **Pure Page Object Model** without abstract component layers to keep onboarding and development simple.
 
 ### PageManager
 Each product has a `PageManager` that centralizes access to all page objects. Step definitions access pages via `this.pages.<pageName>`.
@@ -78,17 +79,17 @@ npm run generate:product -- --name productC
 Create a `.feature` file in your product's `features/` directory. 
 **Rule:** Write declarative, business-focused behavior. Do not use XPaths or CSS locators in the Gherkin text.
 
-### 2. Adding a Page Object & Component
+### 2. Adding a Page Object
 Create a class in your product's `pages/` directory extending `BasePage`.
-**Rule:** Encapsulate all locators and UI interactions here. Do not put `expect()` assertions in Page Objects.
-*If a UI element (like a Header) is shared across multiple pages in YOUR product, extract it to `components/`.*
+**Rule:** Encapsulate all locators and UI interactions here. Keep the architecture flat and simple (Pure POM). Do not expose Locators to Step Definitions. Instead, return booleans, strings, or numbers from your Page Objects for assertions.
 
 ### 3. Creating Step Definitions
 Create a `.steps.ts` file in your product's `steps/` directory.
-**Rule:** Access Page Objects via `this.pages.<pageName>` (from Cucumber World). Perform your assertions here using Playwright's web-first assertions (e.g., `expect(locator).toBeVisible()`).
+**Rule:** Step definitions must NEVER interact with DOM locators directly (e.g., no `expect(page.locator).toBeVisible()`). Instead, ask the Page Object for data or state (e.g., `await this.pages.loginPage.isDashboardVisible()`) and assert on the returned data. This guarantees strict encapsulation.
+**State:** You can share data between steps safely using the strongly-typed `this.sharedData` object which resets per scenario.
 
 ### 4. Test Data
-Store test data fixtures in your product's `data/` directory using typed TypeScript objects. Use the environment resolver pattern (`qa.data.ts`, `uat.data.ts`, `common.data.ts`, and `index.ts`) so data dynamically adapts based on `TEST_ENV`. Reference them in step definitions instead of hardcoding strings.
+Store test data fixtures in your product's `data/` directory using typed TypeScript objects. Use the environment resolver pattern (`qa.data.ts`, `uat.data.ts`, `common.data.ts`, and `index.ts`) so data dynamically adapts based on `TEST_ENV`. The exports are strongly typed via `typeof` casting in `index.ts` so developers get IDE autocomplete for all environments.
 
 ### 5. Data-Driven Testing
 When testing multiple input combinations (e.g., testing various user roles or validation messages), use Cucumber's `Scenario Outline` with an `Examples` table in your `.feature` file.
