@@ -26,4 +26,16 @@ export class LoginPage extends BasePage {
     await this.fillAndVerify(this.passwordInput, password);
     await this.safeClick(this.loginButton);
   }
+
+  async getErrorMessage(): Promise<string> {
+    return this.getText(this.errorMessage);
+  }
+
+  async isErrorMessageVisible(): Promise<boolean> {
+    return this.isVisible(this.errorMessage);
+  }
+
+  async waitForErrorMessage(): Promise<void> {
+    await this.waitForVisible(this.errorMessage, 5000);
+  }
 }

@@ -17,11 +17,11 @@ export class CheckoutCompletePage extends BasePage {
 
   // Methods
   async getConfirmationHeader(): Promise<string> {
-    return (await this.completeHeader.textContent()) ?? '';
+    return this.getText(this.completeHeader);
   }
 
   async getConfirmationText(): Promise<string> {
-    return (await this.completeText.textContent()) ?? '';
+    return this.getText(this.completeText);
   }
 
   async clickBackHome(): Promise<void> {

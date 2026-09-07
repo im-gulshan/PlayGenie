@@ -48,7 +48,7 @@ Then('User should see the product name and price on the overview page', async fu
   this.logger.info(
     'Producst on checkout overview page -  ' +
       product[0] +
-      '\n Products added in cart - ' +
+      'Products added in cart - ' +
       expectedProductName,
   );
 });
