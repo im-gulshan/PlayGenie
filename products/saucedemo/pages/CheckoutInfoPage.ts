@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '@core/pages/BasePage';
+import { Logger } from '@core/utils/logger';
 
 export class CheckoutInfoPage extends BasePage {
   readonly firstName: Locator;
@@ -7,8 +8,8 @@ export class CheckoutInfoPage extends BasePage {
   readonly zipCode: Locator;
   readonly continueButton: Locator;
 
-  constructor(page: Page) {
-    super(page);
+  constructor(page: Page, logger?: Logger) {
+    super(page, logger);
 
     // Locators
     this.firstName = page.getByRole('textbox', { name: 'First Name' });

@@ -1,13 +1,14 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '@core/pages/BasePage';
+import { Logger } from '@core/utils/logger';
 
 export class CheckoutOverviewPage extends BasePage {
   readonly finishButton: Locator;
   readonly itemTotal: Locator;
   readonly summaryInfo: Locator;
   readonly productNames: Locator;
-  constructor(page: Page) {
-    super(page);
+  constructor(page: Page, logger?: Logger) {
+    super(page, logger);
 
     // Locators
     this.finishButton = page.getByRole('button', { name: 'finish' });

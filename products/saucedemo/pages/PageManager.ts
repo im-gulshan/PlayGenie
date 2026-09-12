@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { Logger } from '@core/utils/logger';
 import { LoginPage } from './LoginPage';
 import { ProductsPage } from './ProductsPage';
 import { CartPage } from './CartPage';
@@ -24,12 +25,15 @@ export class PageManager {
   readonly checkoutOverviewPage: CheckoutOverviewPage;
   readonly checkoutCompletePage: CheckoutCompletePage;
 
-  constructor(public readonly page: Page) {
-    this.loginPage = new LoginPage(this.page);
-    this.productsPage = new ProductsPage(this.page);
-    this.cartPage = new CartPage(this.page);
-    this.checkoutInfoPage = new CheckoutInfoPage(this.page);
-    this.checkoutOverviewPage = new CheckoutOverviewPage(this.page);
-    this.checkoutCompletePage = new CheckoutCompletePage(this.page);
+  constructor(
+    public readonly page: Page,
+    private readonly logger: Logger,
+  ) {
+    this.loginPage = new LoginPage(this.page, this.logger);
+    this.productsPage = new ProductsPage(this.page, this.logger);
+    this.cartPage = new CartPage(this.page, this.logger);
+    this.checkoutInfoPage = new CheckoutInfoPage(this.page, this.logger);
+    this.checkoutOverviewPage = new CheckoutOverviewPage(this.page, this.logger);
+    this.checkoutCompletePage = new CheckoutCompletePage(this.page, this.logger);
   }
 }

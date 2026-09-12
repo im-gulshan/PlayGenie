@@ -3,11 +3,10 @@ import { When, Then } from '../support/steps';
 import { sauceDemoData } from '../data';
 
 When('User adds the first product to the cart', async function () {
-  await this.pages.productsPage.selectFirstProduct();
-  this.logger.info('Product successfully added to the cart.');
-
-  this.sharedData.firstProdName = (await this.pages.productsPage.getFirstProductName()) ?? '';
-  this.logger.info('Extracted first product name');
+  this.logger.info('Adding the first product to the cart...');
+  this.sharedData.firstProdName = await this.pages.productsPage.selectFirstProduct();
+  this.logger.info('First product successfully added to the cart.');
+  this.logger.info('Extracted first product name : ' + this.sharedData.firstProdName);
 });
 
 When('User proceeds to checkout', async function () {
@@ -46,9 +45,9 @@ Then('User should see the product name and price on the overview page', async fu
 
   expect(product[0]).toBe(expectedProductName);
   this.logger.info(
-    'Producst on checkout overview page -  ' +
+    'Products on checkout overview page - ' +
       product[0] +
-      'Products added in cart - ' +
+      ' | Products added in cart - ' +
       expectedProductName,
   );
 });
@@ -69,5 +68,34 @@ Then('User should see the order confirmation message', async function () {
       expectedSuccessOrderMsg +
       ', and actual Success order msg :' +
       actualSuccessOrderMsg,
+  );
+});
+
+When('User add {int} product in cart', async function (n: number) {
+  this.logger.info(`Starting to add ${n} product(s) to the cart...`);
+  this.sharedData.allProductsName = await this.pages.productsPage.selectMultipleProduct(n);
+  this.logger.info(`${n} product(s) successfully added to the cart.`);
+  this.logger.info(
+    `Extracted ${this.sharedData.allProductsName.length} product name(s) : ` +
+      JSON.stringify(this.sharedData.allProductsName),
+  );
+});
+
+Then('User should see the multiple product name and price on the overview page', async function () {
+  const expectedProductName = this.sharedData.allProductsName;
+  this.logger.info(
+    'Validating that the overview page shows the correct product: ' +
+      JSON.stringify(expectedProductName),
+  );
+
+  const product: string[] = await this.pages.checkoutOverviewPage.getAllProductNames();
+  this.logger.info('Product name which we extracted from UI : ' + JSON.stringify(product));
+
+  expect(product).toEqual(expectedProductName);
+  this.logger.info(
+    'Products on checkout overview page - ' +
+      JSON.stringify(product) +
+      ' | Products added in cart - ' +
+      JSON.stringify(expectedProductName),
   );
 });
