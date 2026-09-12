@@ -1,4 +1,4 @@
-﻿import { Page, Locator } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { BasePage } from '@core/pages/BasePage';
 import { Logger } from '@core/utils/logger';
 
@@ -35,29 +35,22 @@ export class HeroPage extends BasePage {
     this.nameBadge = page.locator('#about strong').first();
     this.descriptionParagraph = page.locator('#about p').first();
     // Stats: the parent div contains three generic stat boxes
-    this.statsContainer = page
-      .locator('#about')
-      .locator('div')
-      .filter({ hasText: 'Years Experience' })
-      .first();
+    this.statsContainer = page.locator('#about').getByText('Years Experience').locator('../..');
     this.yearsStatValue = page
       .locator('#about')
-      .locator('div')
-      .filter({ hasText: 'Years Experience' })
-      .locator('div')
-      .first();
+      .getByText('Years Experience')
+      .locator('..')
+      .locator('span');
     this.domainsStatValue = page
       .locator('#about')
-      .locator('div')
-      .filter({ hasText: 'Domains' })
-      .locator('div')
-      .first();
+      .getByText('Domains')
+      .locator('..')
+      .locator('span');
     this.innovationsStatValue = page
       .locator('#about')
-      .locator('div')
-      .filter({ hasText: 'Innovations' })
-      .locator('div')
-      .first();
+      .getByText('Innovations')
+      .locator('..')
+      .locator('span');
     this.emailLink = page.getByRole('link', { name: 'gulshan.sdet@gmail.com' });
     this.linkedInLink = page.getByRole('link', { name: 'LinkedIn Profile' });
     this.scrollDownIndicator = page.getByText('Scroll Down');
