@@ -23,7 +23,9 @@ export class EducationPage extends BasePage {
     this.sectionHeading = page.locator('#education h2');
     this.sectionSubtitle = page.locator('#education p').first();
     // Cards are direct group/article children inside the grid
-    this.educationCards = page.locator('#education [class*="group"]');
+    this.educationCards = page.locator(
+      "//div[contains(@class, 'flex items-start justify-between')]//span[contains(@class, '700')]",
+    );
   }
 
   async isSectionVisible(): Promise<boolean> {
@@ -43,8 +45,7 @@ export class EducationPage extends BasePage {
    */
   async getInstitutionName(index: number): Promise<string> {
     const card = this.educationCards.nth(index);
-    const name = card.locator('h3').first();
-    return this.getText(name);
+    return this.getText(card);
   }
 
   /**

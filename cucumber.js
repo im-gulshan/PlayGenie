@@ -4,7 +4,7 @@ module.exports = {
     requireModule: ['tsx/cjs'],
 
     // Retry failed scenarios once before marking them as failed
-    retry: 1,
+    retry: 0,
 
     // 1. Where are the feature files?
     paths: ['products/portfolio/features/**/*.feature'],
@@ -25,7 +25,7 @@ module.exports = {
     requireModule: ['tsx/cjs'],
 
     // Retry failed scenarios once before marking them as failed
-    retry: 1,
+    retry: 0,
     // Uncomment to only retry scenarios tagged @flaky:
     // retryTagFilter: '@flaky',
 
