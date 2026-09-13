@@ -13,6 +13,7 @@ export class InnovationsPage extends BasePage {
   readonly sectionHeading: Locator;
   readonly sectionSubtitle: Locator;
   readonly accordionItems: Locator;
+  readonly firtInnovationExpand: Locator;
 
   constructor(page: Page, logger?: Logger) {
     super(page, logger);
@@ -21,7 +22,10 @@ export class InnovationsPage extends BasePage {
     this.sectionHeading = page.locator('#innovations h2');
     this.sectionSubtitle = page.locator('#innovations p').first();
     // Each accordion item is a clickable container
-    this.accordionItems = page.locator('#innovations [class*="cursor-pointer"]');
+    this.accordionItems = page.locator(
+      "//span[contains(@class, 'text-sm sm:text-base leading-snug')]",
+    );
+    this.firtInnovationExpand = page.locator("//div[@class='overflow-hidden']");
   }
 
   async isSectionVisible(): Promise<boolean> {
@@ -41,8 +45,7 @@ export class InnovationsPage extends BasePage {
    */
   async getItemTitle(index: number): Promise<string> {
     const item = this.accordionItems.nth(index);
-    const title = item.locator('h3').first();
-    return this.getText(title);
+    return this.getText(item);
   }
 
   /**
@@ -58,9 +61,8 @@ export class InnovationsPage extends BasePage {
    * When expanded, a description paragraph appears inside the item.
    */
   async isItemExpanded(index: number): Promise<boolean> {
-    const item = this.accordionItems.nth(index);
+    const descEl = this.firtInnovationExpand;
     try {
-      const descEl = item.locator('p').first();
       return await descEl.isVisible();
     } catch {
       return false;
