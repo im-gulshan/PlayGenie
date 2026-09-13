@@ -20,8 +20,7 @@ When('I click the Back to Contact button', async function () {
 
 Then('the Contact section should be visible', async function () {
   this.logger.info('Verifying Contact section is visible');
-  const isVisible = await this.pages.contactPage.isSectionVisible();
-  expect(isVisible).toBe(true);
+  await this.pages.contactPage.waitForSectionVisible();
 });
 
 Then('the Contact section heading should be {string}', async function (expected: string) {

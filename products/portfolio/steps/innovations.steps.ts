@@ -15,8 +15,7 @@ When('I expand the first innovation item', async function () {
 
 Then('the Innovations section should be visible', async function () {
   this.logger.info('Verifying Innovations section is visible');
-  const isVisible = await this.pages.innovationsPage.isSectionVisible();
-  expect(isVisible).toBe(true);
+  await this.pages.innovationsPage.waitForSectionVisible();
 });
 
 Then('the Innovations section heading should be {string}', async function (expected: string) {

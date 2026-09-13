@@ -10,8 +10,7 @@ When('I navigate to the Education section', async function () {
 
 Then('the Education section should be visible', async function () {
   this.logger.info('Verifying Education section is visible');
-  const isVisible = await this.pages.educationPage.isSectionVisible();
-  expect(isVisible).toBe(true);
+  await this.pages.educationPage.waitForSectionVisible();
 });
 
 Then('the Education section heading should be {string}', async function (expected: string) {

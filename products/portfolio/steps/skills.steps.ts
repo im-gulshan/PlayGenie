@@ -1,4 +1,4 @@
-﻿import { expect } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { Given, When, Then } from '../support/steps';
 import { portfolioData } from '../data';
 
@@ -16,8 +16,7 @@ When('I click the {string} skills category', async function (categoryName: strin
 
 Then('the Skills section should be visible', async function () {
   this.logger.info('Verifying Skills section is visible');
-  const isVisible = await this.pages.skillsPage.isSectionVisible();
-  expect(isVisible).toBe(true);
+  await this.pages.skillsPage.waitForSectionVisible();
 });
 
 Then('the Skills section heading should be {string}', async function (expected: string) {

@@ -9,8 +9,7 @@ When('I navigate to the Projects section', async function () {
 
 Then('the Projects section should be visible', async function () {
   this.logger.info('Verifying Projects section is visible');
-  const isVisible = await this.pages.projectsPage.isSectionVisible();
-  expect(isVisible).toBe(true);
+  await this.pages.projectsPage.waitForSectionVisible();
 });
 
 Then('the Projects section heading should be {string}', async function (expected: string) {
