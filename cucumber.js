@@ -1,6 +1,6 @@
 module.exports = {
   portfolio: {
-    parallel: 3,
+    parallel: 2,
     requireModule: ['tsx/cjs'],
 
     // Retry failed scenarios once before marking them as failed

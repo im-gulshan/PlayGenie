@@ -47,7 +47,7 @@ export abstract class BasePage {
   /** Navigate to a URL and wait for DOM content to be loaded. */
   async navigateTo(url: string): Promise<void> {
     this.logger.debug(`navigateTo → ${url}`);
-    await this.page.goto(url);
+    await this.page.goto(url, { waitUntil: 'domcontentloaded' });
     await this.page.waitForLoadState('domcontentloaded');
     this.logger.debug(`navigateTo complete → ${url}`);
   }
