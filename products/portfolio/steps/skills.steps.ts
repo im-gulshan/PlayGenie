@@ -47,6 +47,7 @@ Then('the skill tags should be displayed', async function () {
 
 Then('the skill tags should include {string}', async function (expectedSkill: string) {
   this.logger.info(`Verifying skill tag includes: ${expectedSkill}`);
-  const tags = await this.pages.skillsPage.getSkillTagTexts();
-  expect(tags.some((t) => t.includes(expectedSkill))).toBe(true);
+  await expect(
+    this.pages.skillsPage.skillTags.filter({ hasText: expectedSkill }).first(),
+  ).toBeVisible();
 });

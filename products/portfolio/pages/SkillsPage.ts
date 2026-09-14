@@ -1,4 +1,4 @@
-﻿import { Page, Locator } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { BasePage } from '@core/pages/BasePage';
 import { Logger } from '@core/utils/logger';
 
@@ -30,13 +30,9 @@ export class SkillsPage extends BasePage {
     // Desktop pill category buttons — the hidden md:flex container
     this.desktopCategoryButtons = page.locator('#skills .hidden.md\\:flex button');
     // Skill tags container (rendered items after category is selected)
-    this.skillTagsContainer = page
-      .locator('#skills')
-      .locator('div')
-      .filter({ hasText: 'Years' })
-      .last();
-    // Individual skill tags — spans with whitespace-nowrap class
-    this.skillTags = page.locator('#skills span[class*="whitespace-nowrap"]');
+    this.skillTagsContainer = page.locator('#skills div.flex-1');
+    // Individual skill tags
+    this.skillTags = this.skillTagsContainer.locator('span');
   }
 
   async isSectionVisible(): Promise<boolean> {
