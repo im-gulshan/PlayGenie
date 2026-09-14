@@ -1,13 +1,14 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '@core/pages/BasePage';
+import { Logger } from '@core/utils/logger';
 
 export class CheckoutCompletePage extends BasePage {
   readonly completeHeader: Locator;
   readonly completeText: Locator;
   readonly backHomeButton: Locator;
 
-  constructor(page: Page) {
-    super(page);
+  constructor(page: Page, logger?: Logger) {
+    super(page, logger);
 
     // Locators
     this.completeHeader = page.locator('[data-test="complete-header"]');

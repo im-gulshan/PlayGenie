@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { Logger } from '@core/utils/logger';
 
 /**
  * Abstract base class for all Page Objects.
@@ -31,14 +32,24 @@ import { Page, Locator, expect } from '@playwright/test';
  * ```
  */
 export abstract class BasePage {
-  constructor(public readonly page: Page) {}
+  protected logger: Logger;
+
+  constructor(
+    public readonly page: Page,
+    logger?: Logger,
+  ) {
+    // Use provided logger or create a no-op fallback so pages work without one
+    this.logger = logger ?? new Logger('BasePage');
+  }
 
   // ─── Navigation ─────────────────────────────────────────────────────────────
 
   /** Navigate to a URL and wait for DOM content to be loaded. */
   async navigateTo(url: string): Promise<void> {
-    await this.page.goto(url);
+    this.logger.debug(`navigateTo → ${url}`);
+    await this.page.goto(url, { waitUntil: 'domcontentloaded' });
     await this.page.waitForLoadState('domcontentloaded');
+    this.logger.debug(`navigateTo complete → ${url}`);
   }
 
   /** Wait until the DOM content is fully loaded. */
@@ -68,8 +79,11 @@ export abstract class BasePage {
    * Handles off-screen elements that Playwright's default click may miss.
    */
   async safeClick(locator: Locator, options?: { timeout?: number }): Promise<void> {
+    const desc = locator.toString();
+    this.logger.debug(`safeClick → ${desc}`);
     await locator.scrollIntoViewIfNeeded();
     await locator.click(options);
+    this.logger.debug(`safeClick complete → ${desc}`);
   }
 
   /**
@@ -80,8 +94,11 @@ export abstract class BasePage {
     locator: Locator,
     waitState: 'domcontentloaded' | 'networkidle' | 'load' = 'domcontentloaded',
   ): Promise<void> {
+    const desc = locator.toString();
+    this.logger.debug(`clickAndWait → ${desc}`);
     await locator.click();
     await this.page.waitForLoadState(waitState);
+    this.logger.debug(`clickAndWait complete → ${desc}`);
   }
 
   // ─── Input Helpers ──────────────────────────────────────────────────────────
@@ -91,9 +108,12 @@ export abstract class BasePage {
    * Prevents stale-value bugs from partial fills or autofill interference.
    */
   async fillAndVerify(locator: Locator, value: string): Promise<void> {
+    const desc = locator.toString();
+    this.logger.debug(`fillAndVerify → ${desc} = "${value}"`);
     await locator.clear();
     await locator.fill(value);
     await expect(locator).toHaveValue(value);
+    this.logger.debug(`fillAndVerify verified → ${desc}`);
   }
 
   /** Select a dropdown option by its visible text. */
@@ -105,12 +125,18 @@ export abstract class BasePage {
 
   /** Get text content of a single element, returning empty string if null. */
   async getText(locator: Locator): Promise<string> {
-    return (await locator.textContent()) ?? '';
+    const desc = locator.toString();
+    const text = (await locator.textContent()) ?? '';
+    this.logger.debug(`getText → ${desc} = "${text}"`);
+    return text;
   }
 
   /** Get text content of all matching elements. */
   async getTexts(locator: Locator): Promise<string[]> {
-    return locator.allTextContents();
+    const desc = locator.toString();
+    const texts = await locator.allTextContents();
+    this.logger.debug(`getTexts → ${desc} = ${JSON.stringify(texts)}`);
+    return texts;
   }
 
   // ─── Visibility Helpers ─────────────────────────────────────────────────────

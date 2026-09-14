@@ -11,5 +11,5 @@ import { PageManager } from '../pages/PageManager';
  */
 Before(async function () {
   this.sharedData.productName = 'SauceDemo';
-  this.pages = new PageManager(this.page);
+  this.pages = new PageManager(this.page, this.logger);
 });

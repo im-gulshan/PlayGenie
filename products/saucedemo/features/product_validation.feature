@@ -8,6 +8,7 @@ Feature: SauceDemo Place Order
         When I log in as "standard_user"
         Then the SauceDemo dashboard should be visible
 
+    @purchaseSingleProduct
     Scenario: Place a successful order
         When User adds the first product to the cart
         And User proceeds to checkout
@@ -15,3 +16,12 @@ Feature: SauceDemo Place Order
         Then User should see the product name and price on the overview page
         And User completes the order
         Then User should see the order confirmation message
+
+    @purchaseMultipleProduct
+    Scenario: Place order for multiple product
+        When User add 2 product in cart
+        And User proceeds to checkout
+        And User add details in the checkout information page and click on Continue
+        Then User should see the multiple product name and price on the overview page
+# And User completes the order
+# Then User should see the order confirmation message

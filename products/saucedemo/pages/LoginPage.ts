@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '@core/pages/BasePage';
+import { Logger } from '@core/utils/logger';
 
 export class LoginPage extends BasePage {
   readonly usernameInput: Locator;
@@ -7,8 +8,8 @@ export class LoginPage extends BasePage {
   readonly loginButton: Locator;
   readonly errorMessage: Locator;
 
-  constructor(page: Page) {
-    super(page);
+  constructor(page: Page, logger?: Logger) {
+    super(page, logger);
 
     // Locators strictly encapsulated within the Page Object
     this.usernameInput = page.locator('[data-test="username"]');
