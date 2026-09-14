@@ -12,6 +12,9 @@ Execution is strictly isolated by product via `cucumber.js` profiles.
 ```bash
 # Execute SauceDemo
 npm run test:saucedemo
+
+# Execute Portfolio
+npm run test:portfolio
 ```
 
 *(These map to `npx cucumber-js -p saucedemo` internally).*
@@ -33,6 +36,7 @@ Change the target environment by setting `TEST_ENV`. This dynamically loads the 
 **Linux / Mac:**
 ```bash
 TEST_ENV=uat npm run test:saucedemo
+TEST_ENV=qa npm run test:portfolio
 ```
 
 **Windows (PowerShell):**
@@ -56,6 +60,7 @@ The framework runs **headed by default** for local visual debugging. For CI safe
 
 ```bash
 HEADLESS=true npm run test:saucedemo
+HEADLESS=true npm run test:portfolio
 ```
 *(Note: The `Jenkinsfile` already explicitly sets `HEADLESS=true` for you, so it runs safely in CI without changes.)*
 

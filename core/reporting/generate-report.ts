@@ -30,7 +30,14 @@ generate({
       { label: 'Project', value: 'PlayGenie' },
       { label: 'Environment', value: process.env.TEST_ENV || 'qa' },
       { label: 'Browser', value: process.env.BROWSER || 'chromium' },
-      { label: 'Execution Date', value: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'medium' }) },
+      {
+        label: 'Execution Date',
+        value: new Date().toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          dateStyle: 'medium',
+          timeStyle: 'medium',
+        }),
+      },
     ],
   },
 });
