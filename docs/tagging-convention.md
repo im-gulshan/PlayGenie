@@ -10,7 +10,7 @@ Every scenario MUST have at least a **Product Tag** and a **Suite Tag**.
 Every feature file or scenario must be tagged with the product it belongs to. This ensures we don't accidentally run tests for Product A when deploying Product B.
 
 - `@saucedemo`
-- `@productX`
+- `@portfolio`
 
 > **Note**: `cucumber.js` profiles use these tags automatically via path filtering, but it's best practice to include them on the Feature.
 

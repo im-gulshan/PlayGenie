@@ -19,14 +19,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": [
-    "core/**/*.ts",
-    "config/**/*.ts",
-    "products/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "reports"
-  ]
+  "include": ["core/**/*.ts", "config/**/*.ts", "products/**/*.ts"],
+  "exclude": ["node_modules", "dist", "reports"]
 }

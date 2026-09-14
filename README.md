@@ -22,6 +22,13 @@ Products **must never** share Page Objects, Components, or Locators. If Product 
 │   ├── env/                 # Per-environment config files (qa.ts, uat.ts, etc.)
 │   └── global.config.ts     # Framework-wide settings
 ├── products/                # Isolated Product implementations
+│   ├── portfolio/           # Portfolio UI test suite
+│   │   ├── config/          # Environment URLs and overrides
+│   │   ├── data/            # Env-aware test data
+│   │   ├── features/        # BDD feature files
+│   │   ├── pages/           # Page Objects (extend BasePage)
+│   │   ├── steps/           # Step definitions
+│   │   └── support/         # Product-level hooks
 │   └── saucedemo/
 │       ├── auth/            # Persona login state generation scripts
 │       ├── config/          # Product-specific URLs and overrides
@@ -41,9 +48,10 @@ Products **must never** share Page Objects, Components, or Locators. If Product 
 
 ### BasePage Pattern (Pure POM)
 All page objects extend `BasePage` (from `core/pages/BasePage.ts`), which provides:
-- Consistent constructor signature (`page: Page`)
+- Consistent constructor signature (`page: Page`, `logger: Logger`)
 - Shared utility methods: `waitForPageLoad()`, `navigateTo()`, `safeClick()`, `fillAndVerify()`
 - Null-safe text extraction: `getText()`, `getTexts()`
+- Built-in Logger integration: Automatic debug tracing for common interactions (e.g., clicks, navigation, text extraction).
 - A contract that ensures consistency across all products. We use a **Pure Page Object Model** without abstract component layers to keep onboarding and development simple.
 
 ### PageManager
@@ -115,9 +123,9 @@ For local testing, you must create a `.env` file at the root of the project (cop
 
 To change configurations on the fly, use Environment Variables:
 
-* **Product:** `npm run test:saucedemo`
+* **Product:** `npm run test:saucedemo` or `npm run test:portfolio`
 * **Environment:** `$env:TEST_ENV="uat"; npm run test:saucedemo` (PowerShell) or `TEST_ENV=uat npm run test:saucedemo` (Bash)
-* **Browser:** `$env:BROWSER="firefox"; npm run test:saucedemo`
+* **Browser:** `$env:BROWSER="firefox"; npm run test:portfolio`
 * **Headless Mode:** `$env:HEADLESS="true"; npm run test:saucedemo` (By default, the framework runs in Headed mode locally).
 
 ### Test Filtering & Parallelism

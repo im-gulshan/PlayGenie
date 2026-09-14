@@ -4,6 +4,7 @@
   "description": "Multi-product UI Automation Framework using Playwright and Cucumber",
   "scripts": {
     "test:saucedemo": "cucumber-js -p saucedemo",
+    "test:portfolio": "cucumber-js -p portfolio",
     "auth:saucedemo": "tsx products/saucedemo/auth/setup.ts",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,js,json}\"",
