@@ -35,6 +35,7 @@ Useful for local development or targeted regression testing (e.g., "only run che
 - `@checkout`
 - `@inventory`
 - `@search`
+- `@theme` — Portfolio dark/light mode toggle scenarios
 
 ## 5. Execution Modifiers (Special)
 These change how the framework handles the test.
