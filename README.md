@@ -49,9 +49,12 @@ Products **must never** share Page Objects, Components, or Locators. If Product 
 ### BasePage Pattern (Pure POM)
 All page objects extend `BasePage` (from `core/pages/BasePage.ts`), which provides:
 - Consistent constructor signature (`page: Page`, `logger: Logger`)
-- Shared utility methods: `waitForPageLoad()`, `navigateTo()`, `safeClick()`, `fillAndVerify()`
-- Null-safe text extraction: `getText()`, `getTexts()`
-- Built-in Logger integration: Automatic debug tracing for common interactions (e.g., clicks, navigation, text extraction).
+- Navigation utilities with proper wait states
+- Click helpers with automatic scroll-into-view
+- Input helpers with clear-fill-verify patterns
+- Null-safe text extraction (single element and collections)
+- Non-throwing visibility checks (returns `boolean`, never throws)
+- Built-in Logger integration: automatic debug tracing for all interactions
 - A contract that ensures consistency across all products. We use a **Pure Page Object Model** without abstract component layers to keep onboarding and development simple.
 
 ### PageManager
@@ -167,6 +170,27 @@ The pipeline includes:
 2. **Screenshots:** If a scenario fails, a screenshot is automatically taken and attached directly to the report.
 3. **Playwright Traces:** By default, a Trace ZIP is saved to `reports/artifacts/` on failure. You can view this trace by uploading it to [trace.playwright.dev](https://trace.playwright.dev) to time-travel through the DOM state of the failure.
 4. **Logs:** Winston logs are written to `logs/error.log` (errors only) and `logs/combined.log` (all levels).
+
+---
+
+## 🤖 AI Development (Antigravity Skill)
+
+This repository includes a **PlayGenie Framework Knowledge Skill** for the
+[Antigravity IDE](https://antigravity.dev). It acts as the AI agent's single
+source of truth about this codebase, preventing hallucination when debugging,
+scaffolding, or extending the framework.
+
+**Location:** `.agents/skills/playgenie-framework/`
+
+**What it covers:**
+- Full product inventory (every file in `portfolio` and `saucedemo`)
+- Core layer: `BasePage`, `CustomWorld`, lifecycle hooks, `Logger`, `StorageManager`
+- Config system and environment variable reference
+- Established patterns for adding pages, features, steps, and new products
+- All runnable commands, tags, Docker, and CI execution
+
+The skill auto-activates when an AI agent works on anything in this repository.
+No manual prompt is needed. Reference files are in `.agents/skills/playgenie-framework/references/`.
 
 ---
 
