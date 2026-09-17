@@ -67,9 +67,8 @@ runtime errors, type errors, or broken test isolation.
 7. **Never call `console.log` in framework code.** Always use `this.logger` in
    steps and hooks. Use the `Logger` class directly in core/utility files.
 
-8. ⚠️ **Known Gap — Theme Toggle Steps:** The step definitions for
-   `portfolio/features/theme_toggle.feature` are **temporarily located inside**
-   `products/portfolio/steps/navigation.steps.ts` (approximately lines 16–42).
-   A dedicated `products/portfolio/steps/theme_toggle.steps.ts` is planned.
-   When it is created, those step definitions will be moved there. Do not create
-   duplicate step definitions for theme toggle.
+8. **Theme Toggle Steps live in `navigation.steps.ts` — this is intentional.**
+   The step definitions for `portfolio/features/theme_toggle.feature` (`I click
+   the theme toggle button`, `the theme toggle button should be visible`) are
+   defined inside `products/portfolio/steps/navigation.steps.ts`. There is no
+   separate `theme_toggle.steps.ts` and none is planned. Do **not** create one.

@@ -84,7 +84,7 @@ read this document first.
 | File | Covers |
 |---|---|
 | [`steps/hero.steps.ts`](../../../products/portfolio/steps/hero.steps.ts) | Hero section step definitions |
-| [`steps/navigation.steps.ts`](../../../products/portfolio/steps/navigation.steps.ts) | Navigation step definitions + **theme toggle step definitions (temporarily here — see Known Gap below)** |
+| [`steps/navigation.steps.ts`](../../../products/portfolio/steps/navigation.steps.ts) | Navigation step definitions + **theme toggle step definitions (intentionally co-located here — see note below)** |
 | [`steps/experience.steps.ts`](../../../products/portfolio/steps/experience.steps.ts) | Experience section step definitions |
 | [`steps/skills.steps.ts`](../../../products/portfolio/steps/skills.steps.ts) | Skills section step definitions |
 | [`steps/projects.steps.ts`](../../../products/portfolio/steps/projects.steps.ts) | Projects section step definitions |
@@ -92,13 +92,11 @@ read this document first.
 | [`steps/education.steps.ts`](../../../products/portfolio/steps/education.steps.ts) | Education section step definitions |
 | [`steps/contact.steps.ts`](../../../products/portfolio/steps/contact.steps.ts) | Contact section step definitions |
 
-> ⚠️ **Known Gap — Theme Toggle Steps:**
-> `theme_toggle.feature` exists but there is no `theme_toggle.steps.ts` yet.
-> The theme toggle step definitions (`I click the theme toggle button`,
-> `the theme toggle button should be visible`) are currently defined inside
-> `navigation.steps.ts`. A dedicated `steps/theme_toggle.steps.ts` is planned.
-> When created, those step definitions will be moved from `navigation.steps.ts`
-> to `theme_toggle.steps.ts`. Do **not** create duplicate step definitions.
+> **Theme Toggle Steps — Intentional Design:**
+> The step definitions for `theme_toggle.feature` (`I click the theme toggle
+> button`, `the theme toggle button should be visible`) are defined inside
+> `navigation.steps.ts`. This is intentional — there is no separate
+> `theme_toggle.steps.ts` and none is planned. Do **not** create one.
 
 ---
 
